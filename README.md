@@ -1,4 +1,7 @@
 # 監査ログ検索ハンズオン
+
+@(Handson)
+
 ![Alt text](img/1565917987115.png)
 
 
@@ -134,6 +137,7 @@ ORDER BY datetime DESC
 
 ## 2. Redshift 監査ログ
 ###  2.1 監査ログ設定
+**Redshiftの監査ログは設定からS3に出力されるまでに時間を要します。**
 
 ##### Redshift > クラスター
 クラスターを選択し、データベースをクリック
@@ -146,13 +150,14 @@ ORDER BY datetime DESC
 * S3バケット　新規作成を選択
 * 新規バケット名　`redshift-audit-<アカウントID>`
 * S3キープレフィックス `dwhaudit`　を入力して保存
-![Alt text](img/1565762805461.png)
+![Alt text](img/1566265794894.png)
 
 ### 2.2 Amazon S3を確認
 S3のバケットができたことを確認
 ![Alt text](img/1565763059679.png)
 
 ### 2.3 Redshiftにアクセスしてログを残す
+**Redshiftの監査ログは設定からS3に出力されるまでに時間を要します。**
 Redshift > クラスター
 ![Alt text](img/1565763199902.png)
 
@@ -298,14 +303,15 @@ location 's3://redshift-audit-<アカウントID>/dwhaudit/AWSLogs/<アカウン
 ```
 
 #### S3の YYYY/MM/DD に分割されたデータをパーティションとして登録
-S3にはデータが YYYY/MM/DD に分割されている。これをパーティションとして登録しないと検索されない。
+S3にはデータが YYYY/MM/DD に分割されている。これをパーティションとして登録しないと検索されません。
+以下を例に`<アカウントID>` と`YYYY/MM/DD/`にハンズオンのアカウントIDと本日の日付を入れてください。
 ```
-ALTER TABLE auditlogdb.connectionlog ADD PARTITION (year='2019',month='08',day='14') location 's3://redshift-audit-<アカウントID>/dwhaudit/AWSLogs/<アカウントID>/redshift/ap-northeast-1/2019/08/14/';
+ALTER TABLE auditlogdb.connectionlog ADD PARTITION (year='2019',month='08',day='14') location 's3://redshift-audit-<アカウントID>/dwhaudit/AWSLogs/<アカウントID>/redshift/ap-northeast-1/YYYY/MM/DD/';
 
 
-ALTER TABLE auditlogdb.activitylog ADD PARTITION (year='2019',month='08',day='14') location 's3://redshift-audit-<アカウントID>/dwhaudit/AWSLogs/<アカウントID>/redshift/ap-northeast-1/2019/08/14/';
+ALTER TABLE auditlogdb.activitylog ADD PARTITION (year='2019',month='08',day='14') location 's3://redshift-audit-<アカウントID>/dwhaudit/AWSLogs/<アカウントID>/redshift/ap-northeast-1/YYYY/MM/DD/';
 
-ALTER TABLE auditlogdb.userlog ADD PARTITION (year='2019',month='08',day='14') location 's3://redshift-audit-<アカウントID>/dwhaudit/AWSLogs/<アカウントID>/redshift/ap-northeast-1/2019/08/14/';
+ALTER TABLE auditlogdb.userlog ADD PARTITION (year='2019',month='08',day='14') location 's3://redshift-audit-<アカウントID>/dwhaudit/AWSLogs/<アカウントID>/redshift/ap-northeast-1/YYYY/MM/DD/';
 ```
 
 ![Alt text](img/1565771780085.png)
@@ -322,6 +328,7 @@ SELECT * FROM "auditlogdb"."connectionlog" limit 10;
 
 ## 3. CloudTrail ログをElasticsearchで検索
 ![Alt text](img/1565934400798.png)
+
 
 ### 3.1 CloudTrail 証跡を CloudWatch Logsへ配信する
 CloudTrail > 証跡情報　
@@ -595,7 +602,11 @@ Management  > Saved Objects > Import
 ![Alt text](img/1565881358872.png)
 
 ##### flow-dashboard.json をimport
+flow-dashborad.json ファイルを指定し、
 ![Alt text](img/1565881421214.png)
+
+New index に flowlog を選択して　**Confirm all changes** を押す
+![Alt text](img/1566266530667.png)
 
 ##### import成功したら　done
 ![Alt text](img/1565881490639.png)
@@ -604,3 +615,4 @@ Management  > Saved Objects > Import
 ![Alt text](img/1565881590873.png)
 
 ##### 以上、dashboardを自由にカスタマイズしてください。
+
